@@ -1,4 +1,4 @@
-import { TestBed, tick, fakeAsync, flush } from '@angular/core/testing';
+import { TestBed, tick, fakeAsync, discardPeriodicTasks } from '@angular/core/testing';
 
 import { CounterService } from './counter.service';
 
@@ -14,7 +14,7 @@ describe('CounterService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should start timer', fakeAsync(() => {
+  it('should keep the counter value after start', fakeAsync(() => {
     let counter = 0;
     service.init(100).subscribe((v:number) => {
       counter = v;
@@ -26,6 +26,41 @@ describe('CounterService', () => {
     service.start();
     tick(200);
     expect(counter).toEqual(4);
-    flush();
+    
+    discardPeriodicTasks();
+  }));
+
+  it('should reset the counter while timer is running', fakeAsync(() => {
+    let counter = 0;
+    service.init(100).subscribe((v:number) => {
+      counter = v;
+    });
+    service.start();
+    tick(200);
+    expect(counter).toEqual(2);
+    service.reset();
+    tick(300);
+    expect(counter).toEqual(2);
+    
+    discardPeriodicTasks();
+  }));
+
+  it('should reset the counter after pause', fakeAsync(() => {
+    let counter = 0;
+    service.init(100).subscribe((v:number) => {
+      counter = v;
+    });
+    service.start();
+    tick(200);
+    expect(counter).toEqual(2);
+    service.stop();
+    service.reset();
+    tick(100);
+    expect(counter).toEqual(0);
+    service.start();
+    tick(200);
+    expect(counter).toEqual(2);
+    
+    discardPeriodicTasks();
   }));
 });

@@ -1,1 +1,6 @@
 /* Add application styles & imports to this file! */
+@import '@angular/material/prebuilt-themes/pink-bluegrey.css';
+
+.app-container {
+  background-color: #191919;
+}
