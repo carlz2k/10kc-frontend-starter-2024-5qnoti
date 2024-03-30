@@ -60,6 +60,21 @@
               "src/**/*.html"
             ]
           }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "include": [
+              "src/**/*.spec.ts",
+              "src/**/*.d.ts"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "scripts": []
+          }
         }
       },
       "prefix": "app",
