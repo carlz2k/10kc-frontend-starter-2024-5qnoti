@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "npm install && ng serve",
     "watch": "ng serve --watch",
     "build": "ng build",
     "lint": "ng lint",

@@ -4,3 +4,11 @@
 .app-container {
   background-color: #191919;
 }
+
+.flex-row {
+  display: flex; flex-direction: row;
+}
+
+.flex-row.center{
+  justify-content: center;
+}

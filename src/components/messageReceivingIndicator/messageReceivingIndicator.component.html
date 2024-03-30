@@ -1,15 +1,2 @@
-<div class="flex-container">
-  <div class="flex-column">
-    <div class="flex-row center">
-      <button mat-icon-button aria-label="reset button" (click)="reset()" [disabled]="resetDisabled">
-        <mat-icon fontIcon="mail_outline" class="material-icons color_white" [matBadge]="currentCounter"
-          matBadgeOverlap="false" matBadgePosition="above after" matBadgeSize="medium"></mat-icon>
-      </button>
-    </div>
-
-    <div class="flex-row center">
-      <button mat-flat-button color="primary" (click)="start()" [disabled]="startDisabled">Start</button>
-      <button mat-flat-button color="primary" (click)="stop()" [disabled]="stopDisabled" style="margin-left: 8px;">Stop</button>
-    </div>
-  </div>
-</div>
+<span><mat-icon fontIcon="mail_outline" class="material-icons color_white" [matBadge]="currentCounter"
+  matBadgeOverlap="false" matBadgePosition="above after" matBadgeSize="medium"></mat-icon></span>

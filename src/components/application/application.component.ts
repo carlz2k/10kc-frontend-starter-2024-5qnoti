@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { MessageReceivingIndicator } from '../messageReceivingIndicator/messageReceivingIndicator.component';
+import { MessageReceiverButtonGroup } from '../message-receiver-button-group/message-receiver-button-group.component';
 
 @Component({
   selector: 'app-application',
   standalone: true,
-  imports: [MessageReceivingIndicator],
+  imports: [MessageReceiverButtonGroup],
   templateUrl: './application.component.html',
   styleUrl: './application.component.css'
 })
