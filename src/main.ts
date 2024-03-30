@@ -8,7 +8,7 @@ import 'zone.js';
   template: `
     <h1>Hello from {{ name }}!</h1>
     <a target="_blank" href="https://angular.dev/overview">
-      Learn more about Angular
+      Learn more about Angular12
     </a>
   `,
 })
