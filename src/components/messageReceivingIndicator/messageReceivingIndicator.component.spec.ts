@@ -1,33 +1,33 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CounterComponent } from './counter.component';
-import { CounterService } from '../../services/counter.service';
+import { MessageReceivingIndicator } from './messageReceivingIndicator.component';
+import { MessageReceiver } from '../../services/messageReceiver.service';
 import { Observable } from 'rxjs';
 
 describe('CounterComponent', () => {
-  let component: CounterComponent;
-  let fixture: ComponentFixture<CounterComponent>;
-  let counterService: CounterService;
+  let component: MessageReceivingIndicator;
+  let fixture: ComponentFixture<MessageReceivingIndicator>;
+  let messageReceiver: MessageReceiver;
 
   beforeEach(async () => {
-    const counterServiceStub = jasmine.createSpyObj(["start", "stop", "reset", "init", "finish"]);
-    counterServiceStub.init.and.returnValue(new Observable());
+    const messageReceiverStub = jasmine.createSpyObj(["start", "stop", "reset", "init", "finish"]);
+    messageReceiverStub.init.and.returnValue(new Observable());
 
     await TestBed.configureTestingModule({
-      imports: [CounterComponent],
-      providers: [{ provide: CounterService, useValue: counterServiceStub }],
+      imports: [MessageReceivingIndicator],
+      providers: [{ provide: MessageReceiver, useValue: messageReceiverStub }],
     }).compileComponents();
 
-    counterService = TestBed.inject(CounterService);
+    messageReceiver = TestBed.inject(MessageReceiver);
 
-    fixture = TestBed.createComponent(CounterComponent);
+    fixture = TestBed.createComponent(MessageReceivingIndicator);
     component = fixture.componentInstance;
     
     fixture.detectChanges();
   });
 
   it('should create the counter component', () => {
-    expect(counterService.init).toHaveBeenCalled();
+    expect(messageReceiver.init).toHaveBeenCalled();
     expect(component).toBeTruthy();
   });
 
@@ -39,7 +39,7 @@ describe('CounterComponent', () => {
     expect(component.stopDisabled).toBeTruthy();
     expect(component.startDisabled).toBeFalsy();
     component.start();
-    expect(counterService.start).toHaveBeenCalled();
+    expect(messageReceiver.start).toHaveBeenCalled();
     expect(component.startDisabled).toBeTruthy();
     expect(component.stopDisabled).toBeFalsy();
   });
@@ -49,8 +49,8 @@ describe('CounterComponent', () => {
     expect(component.startDisabled).toBeFalsy();
     component.start();
     component.stop();
-    expect(counterService.start).toHaveBeenCalled();
-    expect(counterService.stop).toHaveBeenCalled();
+    expect(messageReceiver.start).toHaveBeenCalled();
+    expect(messageReceiver.stop).toHaveBeenCalled();
     expect(component.startDisabled).toBeFalsy();
     expect(component.stopDisabled).toBeTruthy();
   });
@@ -60,7 +60,7 @@ describe('CounterComponent', () => {
     component.start();
     expect(component.resetDisabled).toBeFalsy();
     component.reset();
-    expect(counterService.reset).toHaveBeenCalled();
+    expect(messageReceiver.reset).toHaveBeenCalled();
     expect(component.resetDisabled).toBeFalsy();
   });
 

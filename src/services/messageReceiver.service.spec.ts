@@ -1,13 +1,13 @@
 import { TestBed, tick, fakeAsync, discardPeriodicTasks } from '@angular/core/testing';
 
-import { CounterService } from './counter.service';
+import { MessageReceiver } from './messageReceiver.service';
 
-describe('CounterService', () => {
-  let service: CounterService;
+describe('MessageReceiver', () => {
+  let service: MessageReceiver;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(CounterService);
+    service = TestBed.inject(MessageReceiver);
   });
 
   it('should be created', () => {

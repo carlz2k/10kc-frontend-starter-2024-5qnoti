@@ -5,7 +5,7 @@ import { Observable, Subject, timer, map, startWith, switchMap, of } from 'rxjs'
 // start-pause-resume scenario: initialized -> inProgress -> paused -> inProgress
 // start-pause-reset scenario: initialized -> inProgress -> paused -> initialized
 // start-reset scenario: initialized -> inProgress -> initialized -> inProgress
-const COUNTER_STATES = {
+const MESSAGE_RECEIVER_STATES = {
   initialized: 'INITIALIZED',
   paused: 'PAUSED',
   inProgress: 'IN_PROGRESS',
@@ -16,10 +16,10 @@ const COUNTER_STATES = {
 @Injectable({
   providedIn: 'root'
 })
-export class CounterService {
+export class MessageReceiver {
   private _action: Subject<string> = new Subject();
-  private _currentValue = 0;
-  private _currentState = COUNTER_STATES.initialized;
+  private _currentCounter = 0;
+  private _currentState = MESSAGE_RECEIVER_STATES.initialized;
 
   constructor() {
   }
@@ -44,28 +44,28 @@ export class CounterService {
   */
   finish() {
     this._action.complete();
-    this._currentValue = 0;
-    this._currentState = COUNTER_STATES.initialized;
+    this._currentCounter = 0;
+    this._currentState = MESSAGE_RECEIVER_STATES.initialized;
   }
 
   start() {
-    if (this._currentState === COUNTER_STATES.initialized || this._currentState === COUNTER_STATES.paused)
-      this._action.next(COUNTER_STATES.inProgress);
+    if (this._currentState === MESSAGE_RECEIVER_STATES.initialized || this._currentState === MESSAGE_RECEIVER_STATES.paused)
+      this._action.next(MESSAGE_RECEIVER_STATES.inProgress);
   }
 
   stop() {
-    if (this._currentState === COUNTER_STATES.inProgress) {
-      this._currentValue--;
-      this._action.next(COUNTER_STATES.paused);
+    if (this._currentState === MESSAGE_RECEIVER_STATES.inProgress) {
+      this._currentCounter--;
+      this._action.next(MESSAGE_RECEIVER_STATES.paused);
     }
   }
 
   reset() {
-    this._currentValue = 0;
-    if (this._currentState === COUNTER_STATES.initialized)
-      this._action.next(COUNTER_STATES.inProgress);
-    else if (this._currentState === COUNTER_STATES.paused)
-      this._action.next(COUNTER_STATES.initialized);
+    this._currentCounter = 0;
+    if (this._currentState === MESSAGE_RECEIVER_STATES.initialized)
+      this._action.next(MESSAGE_RECEIVER_STATES.inProgress);
+    else if (this._currentState === MESSAGE_RECEIVER_STATES.paused)
+      this._action.next(MESSAGE_RECEIVER_STATES.initialized);
   }
 
   private _reinitializeAction() {
@@ -79,17 +79,17 @@ export class CounterService {
     return this._action.pipe(
       switchMap(state => {
         this._currentState = state;
-        if (state == COUNTER_STATES.inProgress) {
+        if (state == MESSAGE_RECEIVER_STATES.inProgress) {
           // if start from a previous stop action, don't start the timer immediately
           // wait for an interval to pass, to avoid the counter to change too quickly.
           // also reset the previous counter increment
           return this._createNewInterval(intervalInMillisecond, intervalInMillisecond);
-        } else if (state == COUNTER_STATES.paused) {
+        } else if (state == MESSAGE_RECEIVER_STATES.paused) {
           return new Observable<number>();
-        } else if (state == COUNTER_STATES.initialized) {
+        } else if (state == MESSAGE_RECEIVER_STATES.initialized) {
           // if stopped, reset the counter only
           // otherwise restart the count
-          return of(this._currentValue);
+          return of(this._currentCounter);
         }
 
         return new Observable<number>();
@@ -100,9 +100,9 @@ export class CounterService {
   private _createNewInterval(intervalInMillisecond: number, delayInMillisecond: number) {
     const timerObject = timer(delayInMillisecond, intervalInMillisecond);
     return timerObject.pipe(
-      startWith(this._currentValue),
+      startWith(this._currentCounter),
       map(() => {
-        return this._currentValue++;
+        return this._currentCounter++;
       }),
     );
   }

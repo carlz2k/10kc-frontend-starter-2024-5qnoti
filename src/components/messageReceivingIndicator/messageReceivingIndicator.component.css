@@ -24,7 +24,3 @@
 .flex-row.center{
   justify-content: center;
 }
-
-.flex-row.even-spacing{
-  justify-content: space-evenly;
-}

@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { CounterComponent } from '../counter/counter.component';
+import { MessageReceivingIndicator } from '../messageReceivingIndicator/messageReceivingIndicator.component';
 
 @Component({
   selector: 'app-application',
   standalone: true,
-  imports: [CounterComponent],
+  imports: [MessageReceivingIndicator],
   templateUrl: './application.component.html',
   styleUrl: './application.component.css'
 })
