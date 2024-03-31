@@ -13,6 +13,10 @@ const MESSAGE_RECEIVER_STATES = {
 
 // the implementation of this service is stateful, thus, init and finish must be called
 // before and after
+// it is probably good enough to this demo as we only have one subscriber
+// if we have multiple subscribers, we probably should
+// 1) have a shared observable if multiple subscribers need to share the same data
+// 2) alow each subscriber will have its own observable and own state machine
 @Injectable({
   providedIn: 'root'
 })
@@ -76,6 +80,9 @@ export class MessageReceiver {
   }
 
   private _bindActionObservable(intervalInMillisecond: number) {
+    // using an action/event driven pattern
+    // to return different data streams based on
+    // the current state (via switchMap)
     return this._action.pipe(
       switchMap(state => {
         this._currentState = state;
