@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, timer, map, startWith, switchMap, of } from 'rxjs';
+import { Observable, Subject, timer, map, startWith, switchMap, of, takeUntil } from 'rxjs';
 
 // state transition
 // start-pause-resume scenario: initialized -> inProgress -> paused -> inProgress
@@ -30,6 +30,7 @@ export class MessageReceiver {
   private _stateTransition: Subject<string> = new Subject();
   private _currentCounter = 0;
   private _currentState = MESSAGE_RECEIVER_STATES.initialized;
+  private _destroyTrigger: Subject<void> = new Subject();
 
   constructor() {
   }
@@ -53,6 +54,8 @@ export class MessageReceiver {
   * must be paired with the init method
   */
   finish() {
+    this._destroyTrigger.next();
+    this._destroyTrigger.complete();
     this._stateTransition.complete();
     this._currentCounter = 0;
     this._currentState = MESSAGE_RECEIVER_STATES.initialized;
@@ -88,6 +91,10 @@ export class MessageReceiver {
     return this._stateTransition.pipe(
       switchMap(state => {
         this._currentState = state;
+        
+        // destroy previous pipeline
+        this._destroyTrigger.next();
+
         if (state == MESSAGE_RECEIVER_STATES.inProgress) {
           // if start from a previous stop action, don't start the timer immediately
           // wait for an interval to pass, to avoid the counter to change too quickly.
