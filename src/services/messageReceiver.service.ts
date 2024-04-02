@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject, timer, map, startWith, switchMap, of, takeUntil } from 'rxjs';
+import { Subject, map, of, startWith, switchMap, takeUntil, timer } from 'rxjs';
 
 // state transition
 // start-pause-resume scenario: initialized -> inProgress -> paused -> inProgress
@@ -100,15 +100,9 @@ export class MessageReceiver {
           // wait for an interval to pass, to avoid the counter to change too quickly.
           // also reset the previous counter increment
           return this._createNewInterval(intervalInMillisecond, intervalInMillisecond);
-        } else if (state == MESSAGE_RECEIVER_STATES.paused) {
-          return new Observable<number>();
-        } else if (state == MESSAGE_RECEIVER_STATES.initialized) {
-          // if stopped, reset the counter only
-          // otherwise restart the count
-          return of(this._currentCounter);
         }
 
-        return new Observable<number>();
+        return of(this._currentCounter);
       })
     );
   }
@@ -116,6 +110,7 @@ export class MessageReceiver {
   private _createNewInterval(intervalInMillisecond: number, delayInMillisecond: number) {
     const timerObject = timer(delayInMillisecond, intervalInMillisecond);
     return timerObject.pipe(
+      takeUntil(this._destroyTrigger),
       startWith(this._currentCounter),
       map(() => {
         return this._currentCounter++;
