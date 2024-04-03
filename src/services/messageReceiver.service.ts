@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Subject, map, of, startWith, switchMap, takeUntil, timer } from 'rxjs';
+import { Subject, connectable, interval, map, of, startWith, switchMap, take, takeUntil, takeWhile, tap, timer } from 'rxjs';
 
 // state transition
 // start-pause-resume scenario: initialized -> inProgress -> paused -> inProgress
 // start-pause-reset scenario: initialized -> inProgress -> paused -> initialized
-// start-reset scenario: initialized -> inProgress -> initialized -> inProgress
+// start-reset-reset-pause scenario: initialized -> inProgress -> restarted -> restarted -> pause
 const MESSAGE_RECEIVER_STATES = {
   initialized: 'INITIALIZED',
   paused: 'PAUSED',
   inProgress: 'IN_PROGRESS',
+  restarted: 'RESTARTED',
 }
 
 const MESSAGE_RECEIVER_ACTIONS = {
@@ -66,9 +67,6 @@ export class MessageReceiver {
   }
 
   stop() {
-    if (this._currentState === MESSAGE_RECEIVER_STATES.inProgress) {
-      this._currentCounter--;
-    }
     this._triggerNextState(MESSAGE_RECEIVER_ACTIONS.stop);
   }
 
@@ -88,39 +86,44 @@ export class MessageReceiver {
     // using an action/event driven pattern
     // to return different data streams based on
     // the current state (via switchMap)
-    return this._stateTransition.pipe(
+
+    // use connectable for multicast to support multiple subscribers
+    const observable = connectable(this._stateTransition.pipe(
       switchMap(state => {
         this._currentState = state;
-        
+
         // destroy previous pipeline
         this._destroyTrigger.next();
 
-        if (state == MESSAGE_RECEIVER_STATES.inProgress) {
-          // if start from a previous stop action, don't start the timer immediately
-          // wait for an interval to pass, to avoid the counter to change too quickly.
-          // also reset the previous counter increment
-          return this._createNewInterval(intervalInMillisecond, intervalInMillisecond);
+        if (state === MESSAGE_RECEIVER_STATES.inProgress || state === MESSAGE_RECEIVER_STATES.restarted) {
+          return this._createNewInterval(intervalInMillisecond);
         }
 
         return of(this._currentCounter);
       })
-    );
+    ));
+
+    observable.connect();
+
+    return observable;
   }
 
-  private _createNewInterval(intervalInMillisecond: number, delayInMillisecond: number) {
-    const timerObject = timer(delayInMillisecond, intervalInMillisecond);
+  private _createNewInterval(intervalInMillisecond: number) {
+    const startValue = this._currentCounter;
+    const timerObject = timer(0, intervalInMillisecond);
     return timerObject.pipe(
       takeUntil(this._destroyTrigger),
-      startWith(this._currentCounter),
-      map(() => {
-        return this._currentCounter++;
+      // side effect for increasing counters
+      tap((v) => {
+        this._currentCounter = v + startValue;
       }),
+      map(() => this._currentCounter)
     );
   }
 
   private _triggerNextState(action: string) {
     if (this._currentState === MESSAGE_RECEIVER_STATES.initialized) {
-      if (action === MESSAGE_RECEIVER_ACTIONS.start || action === MESSAGE_RECEIVER_ACTIONS.reset) {
+      if (action === MESSAGE_RECEIVER_ACTIONS.start) {
         this._stateTransition.next(MESSAGE_RECEIVER_STATES.inProgress);
       }
     } else if (this._currentState === MESSAGE_RECEIVER_STATES.paused) {
@@ -132,6 +135,14 @@ export class MessageReceiver {
     } else if (this._currentState === MESSAGE_RECEIVER_STATES.inProgress) {
       if (action === MESSAGE_RECEIVER_ACTIONS.stop) {
         this._stateTransition.next(MESSAGE_RECEIVER_STATES.paused);
+      } else if (action === MESSAGE_RECEIVER_ACTIONS.reset) {
+        this._stateTransition.next(MESSAGE_RECEIVER_STATES.restarted);
+      }
+    } else if (this._currentState === MESSAGE_RECEIVER_STATES.restarted) {
+      if (action === MESSAGE_RECEIVER_ACTIONS.stop) {
+        this._stateTransition.next(MESSAGE_RECEIVER_STATES.paused);
+      } else if (action === MESSAGE_RECEIVER_ACTIONS.reset) {
+        this._stateTransition.next(MESSAGE_RECEIVER_STATES.restarted);
       }
     }
   }

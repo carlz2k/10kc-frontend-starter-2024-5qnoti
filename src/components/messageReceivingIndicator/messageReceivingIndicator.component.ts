@@ -21,7 +21,7 @@ export class MessageReceivingIndicator implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.counterService.init(COUNTER_INTERVAL_MILISECONDS).subscribe(
-      value => {
+      (value: number) => {
         this.currentCounter = value;
       }
     );

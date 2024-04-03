@@ -6,8 +6,7 @@ describe('MessageReceiver', () => {
   let service: MessageReceiver;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(MessageReceiver);
+    service = new MessageReceiver();
   });
 
   it('should be created', () => {
@@ -23,10 +22,11 @@ describe('MessageReceiver', () => {
     tick(200);
     expect(counter).toEqual(2);
     service.stop();
+    tick(200);
+    expect(counter).toEqual(2);
     service.start();
     tick(200);
     expect(counter).toEqual(4);
-    
     discardPeriodicTasks();
   }));
 
@@ -40,7 +40,7 @@ describe('MessageReceiver', () => {
     expect(counter).toEqual(2);
     service.reset();
     tick(300);
-    expect(counter).toEqual(2);
+    expect(counter).toEqual(3);
     
     discardPeriodicTasks();
   }));
